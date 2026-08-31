@@ -26,14 +26,11 @@
 
 ## 安装 Skill
 
-将本仓库克隆到所用 Agent 的 skills 目录即可（目录名固定为 `小红书抖音视频文案提纯`，不可改名），克隆后重载 / 重启会话生效。
+将本仓库克隆到你的 Agent 的 skills 目录即可（目录名固定为 `小红书抖音视频文案提纯`，不可改名），克隆后重载 / 重启会话生效。
 
-直接运行下面这条命令，会自动检测当前已安装的 Agent（WorkBuddy / Codex / Claude Code），并克隆到对应的 skills 目录，无需手动修改路径：
+直接把本仓库地址交给你的 Agent 安装即可：
 
-```bash
-git clone https://github.com/duuhuang-ai/xhs-douyin-video-copy-purify.git \
-  "$(for d in ~/.workbuddy/skills ~/.codex/skills ~/.claude/skills; do [ -d "$d" ] && { echo "$d"; break; }; done)/小红书抖音视频文案提纯"
-```
+https://github.com/duuhuang-ai/xhs-douyin-video-copy-purify
 
 > 本仓库为扁平结构（Skill 文件直接在根目录），克隆后整个目录即作为 Skill 目录直接使用，目录名必须保持中文 `小红书抖音视频文案提纯`，否则无法被识别。
 
