@@ -1,6 +1,6 @@
 ---
 name: 小红书抖音视频文案提纯
-description: 将抖音/小红书视频链接、本地视频或原始文字稿一键提取文案并转写、提纯整理成可直接分享的干净原文，默认交付飞书文档（可按用户要求调整）。覆盖三类输入：平台链接自动提取+转写、本地视频/音频批量转写、纯文字稿直提纯。触发词：视频文案提纯、小红书抖音视频文案提纯、文案提纯、整理文字稿、结构化逐字稿、直播文字稿、短视频文字稿、播客文字稿、录音转写稿，或直接发送平台链接/本地视频。
+description: 将抖音/小红书/视频号视频链接、本地视频或原始文字稿一键提取文案并转写、提纯整理成可直接分享的干净原文，默认交付飞书文档（可按用户要求调整）。覆盖三类输入：平台链接自动提取+转写、本地视频/音频批量转写、纯文字稿直提纯。触发词：视频号文案提纯、视频文案提纯、小红书抖音视频文案提纯、文案提纯、整理文字稿、结构化逐字稿、直播文字稿、短视频文字稿、播客文字稿、录音转写稿，或直接发送平台链接/本地视频。
 ---
 
 # 小红书抖音视频文案提纯
@@ -44,7 +44,7 @@ On receiving a user request, inspect the input and route to one of three modes:
 
 ### Mode A: Platform Link → Video → ASR → Purify
 
-**Trigger**: The user sends a Douyin (`v.douyin.com`, `douyin.com/video/...`) or Xiaohongshu (`xiaohongshu.com/explore/...`, `xhslink.cn/`) share link.
+**Trigger**: The user sends a Douyin (`v.douyin.com`, `douyin.com/video/...`), Xiaohongshu (`xiaohongshu.com/explore/...`, `xhslink.cn/`) or WeChat Channels (`weixin.qq.com/sph/...`, `channels.weixin.qq.com/...`) share link. For WeChat Channels, follow the dedicated experimental instructions below rather than the Douyin/Xiaohongshu extraction steps.
 
 **Step 1 — Extract video URL via TikHub**
 
@@ -70,9 +70,15 @@ Authorization: Bearer {TIKHUB_API_KEY}
 ```
 Extract the video URL from the response data. Look for `video_url` / `video` / play address fields.
 
-**视频号（微信视频号）**：公开版暂不提供链接自动解密和提取。相关第三方解密依赖的再分发许可尚待核实；如用户已合法取得本地视频、音频或文字稿，可按 Mode B / C 处理。不要宣称链接自动提取已可用。
+**视频号（微信视频号）**：分享链接可使用 `scripts/wechat_channels_extract.py`，该流程为实验性功能；本版本尚未做真实接口和视频端到端验收。只处理用户有权使用的内容。需要 TikHub、OSS、DashScope 的凭证及 `requests`、`oss2`、`dashscope`。读取 `README.md` 中视频号步骤并确认用户知道音视频将上传云端；凭证通过环境变量配置，不在聊天中索取。示例（将 `<Skill目录>` 与其他占位符换成实际值）：
 
-Both platforms use the same base domain. Replace with `api.tikhub.io` when user is overseas.
+```bash
+python "<Skill目录>/scripts/wechat_channels_extract.py" "<视频号分享链接>" --work-dir "<本次尚不存在的工作目录>"
+```
+
+脚本从同一次 TikHub 响应中取视频地址及解密密钥，下载后使用 MIT 授权的 Python ISAAC64 解密前 128KB，校验基础 MP4 标识，再以唯一对象名上传 OSS 并调用百炼。工作目录保留 `encrypted.mp4`、`decrypted.mp4`、`raw.txt`、`meta.json`；OSS 对象也会保留。不要覆盖或删除现有文件，若失败应说明阶段和残留文件。转写完成后进入 Mode C 提纯，核对播放和转写内容；接口、解密与识别可能失败，不能把基础 MP4 检查当完整可播放验证。原始链接及云端对象名称见 meta，避免泄露签名 URL 或密钥。若自动流程不可用，用户可提供已合法获取的音视频或文字稿。
+
+Douyin and Xiaohongshu use the same base domain. Replace with `api.tikhub.io` when user is overseas.
 
 **Step 2 — Download video**
 
