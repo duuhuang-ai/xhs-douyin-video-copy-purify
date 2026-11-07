@@ -12,7 +12,7 @@ Hardened lessons (learned from a 71-video batch that failed twice):
 
 Usage:
   XHS_SOURCE_DIR="/path/to/videos" \
-  XHS_WORK_DIR="/tmp/xhs3" \
+  XHS_WORK_DIR="/path/to/new-work-dir" XHS_OSS_PREFIX="transcripts/unique-run-id" \
   OSS_ACCESS_KEY_ID=... OSS_ACCESS_KEY_SECRET=... OSS_BUCKET_NAME=... OSS_ENDPOINT=... \
   DASHSCOPE_API_KEY=... \
   python batch_asr_pipeline.py [rebuild]
@@ -30,10 +30,12 @@ AUDIO_DIR = os.path.join(WORK, "audio")
 RAW_DIR = os.path.join(WORK, "raw")
 MANIFEST = os.path.join(WORK, "manifest.json")
 LOG = os.path.join(WORK, "pipeline.log")
-OSS_PREFIX = os.environ.get("XHS_OSS_PREFIX", "transcripts/xhs_batch")
+OSS_PREFIX = os.environ.get("XHS_OSS_PREFIX", "")
 
 os.environ["NO_PROXY"] = "*"
 os.environ["no_proxy"] = "*"
+
+os.makedirs(WORK, exist_ok=True)
 
 logging.basicConfig(filename=LOG, level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(message)s")
@@ -41,6 +43,8 @@ log = logging.getLogger("pipeline")
 
 if not BASE:
     sys.exit("XHS_SOURCE_DIR env var required")
+if not OSS_PREFIX:
+    sys.exit("XHS_OSS_PREFIX env var required: choose a unique prefix for each batch")
 
 FF = subprocess_check = subprocess.check_output if False else None
 import subprocess
